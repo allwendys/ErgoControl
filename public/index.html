@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ErgoControl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
+
+    <!-- BARRA DE AVISOS NO TOPO -->
+    <div id="alert-bar" class="hidden bg-amber-500 text-white p-3 font-semibold shadow-md flex justify-between items-center px-4 sticky top-0 z-50">
+        <div class="flex items-center gap-2 text-sm md:text-base">
+            <span class="text-xl">⚠️</span>
+            <span id="alert-message">Aviso urgente aqui!</span>
+        </div>
+        <button onclick="confirmarAviso()" class="bg-white text-amber-700 px-3 py-1 rounded-md text-xs md:text-sm font-bold shadow hover:bg-slate-100">
+            OK
+        </button>
+    </div>
+
+    <!-- CABEÇALHO COM NAVEGAÇÃO -->
+    <header class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-lg md:text-xl font-bold">ErgoControl</h1>
+            <div class="flex gap-2">
+                <button onclick="alternarVisao('operacional')" id="btn-visao-operacional" class="text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold hover:bg-blue-600 transition">
+                    📋 Lançamentos
+                </button>
+                <button onclick="alternarVisao('admin')" id="btn-visao-admin" class="text-xs bg-amber-500 text-slate-900 px-3 py-1.5 rounded-full font-bold hover:bg-amber-400 transition">
+                    ⚙️ Admin / Editar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+
+        <!-- ================= VISÃO OPERACIONAL (LANÇAMENTOS) ================= -->
+        <div id="secao-operacional" class="space-y-6">
+
+            <!-- RESUMO DE BANCO DE HORAS E FOLGAS -->
+            <section class="bg-white p-4 rounded-xl shadow">
+                <h2 class="text-md font-bold mb-3 flex items-center gap-2 text-slate-700">
+                    <span>⏱️</span> Horas Acumuladas & Saldo de Folgas
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-xs font-bold text-blue-800">Beconal (3h/dia)</p>
+                        <p class="text-xl font-black text-blue-900"><span id="hrs-beconal">0</span>h registrados</p>
+                        <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-beconal" class="text-emerald-600">0h</b></p>
+                    </div>
+                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                        <p class="text-xs font-bold text-purple-800">Grupo ENS (3x/sem - 3h)</p>
+                        <p class="text-xl font-black text-purple-900"><span id="hrs-ens">0</span>h registrados</p>
+                        <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-ens" class="text-emerald-600">0h</b></p>
+                    </div>
+                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-xs font-bold text-red-800">Solar Coca-Cola (1x/sem - 6h)</p>
+                        <p class="text-xl font-black text-red-900"><span id="hrs-solar">0</span>h / 24h mês</p>
+                        <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-solar" class="text-emerald-600">0h</b></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- REGISTRO DE PONTO (ENTRADA / SAÍDA) -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-3">
+                <h2 class="text-md font-bold text-slate-700">📝 Registrar Ponto</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                    <div>
+                        <label class="text-xs font-bold block mb-1 text-slate-600">Empresa</label>
+                        <select id="ponto-empresa" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                            <option value="beconal">Beconal</option>
+                            <option value="ens">Grupo ENS</option>
+                            <option value="solar">Solar Coca-Cola</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block mb-1 text-slate-600">Entrada</label>
+                        <input type="time" id="ponto-entrada" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold block mb-1 text-slate-600">Saída</label>
+                        <input type="time" id="ponto-saida" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <button onclick="registrarPonto()" class="bg-emerald-600 text-white font-bold p-2.5 rounded-lg text-sm hover:bg-emerald-700 transition-colors">
+                        Lançar Horas
+                    </button>
+                </div>
+            </section>
+
+            <!-- REGISTRO DE ATIVIDADES -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-4">
+                <h2 class="text-md font-bold text-slate-700">📌 Registrar Atividade por Empresa</h2>
+                
+                <div class="flex gap-2 border-b pb-2">
+                    <button onclick="mudarAba('beconal')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-blue-900 text-white" id="tab-beconal">Beconal</button>
+                    <button onclick="mudarAba('ens')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700" id="tab-ens">Grupo ENS</button>
+                    <button onclick="mudarAba('solar')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700" id="tab-solar">Solar Coca-Cola</button>
+                </div>
+
+                <!-- FORM BECONAL -->
+                <form id="form-beconal" class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold block mb-1">Cinese (Semana 1 a 4 / Qtd)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="beconal-cinese-semana" class="p-2 border rounded-lg text-sm">
+                                    <option value="0">Semana 1</option>
+                                    <option value="1">Semana 2</option>
+                                    <option value="2">Semana 3</option>
+                                    <option value="3">Semana 4</option>
+                                </select>
+                                <input type="number" id="beconal-cinese-qtd" placeholder="Qtd" class="p-2 border rounded-lg text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold block mb-1">AET (Data e Qtd)</label>
+                            <input type="number" id="beconal-aet" placeholder="Adicionar Quantidade" class="p-2 border rounded-lg text-sm w-full">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold block mb-1">Coleta de Dados AET (Qtd)</label>
+                            <input type="number" id="beconal-coleta" placeholder="Adicionar Quantidade" class="p-2 border rounded-lg text-sm w-full">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold block mb-1">DDS (Tema)</label>
+                            <input type="text" id="beconal-dds" placeholder="Digite o tema abordado" class="p-2 border rounded-lg text-sm w-full">
+                        </div>
+                    </div>
+                </form>
+
+                <!-- FORM GRUPO ENS -->
+                <form id="form-ens" class="space-y-3 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">Grávidas</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="ens-gravidas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ens-gravidas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                            </div>
+                        </div>
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">PRAT / Restrito</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="ens-prat-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ens-prat-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                            </div>
+                        </div>
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">Retorno ao Trabalho</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="ens-retorno-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ens-retorno-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                            </div>
+                        </div>
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">Investigação de Queixa</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="ens-queixas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ens-queixas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- FORM SOLAR COCA-COLA -->
+                <form id="form-solar" class="space-y-3 hidden text-xs">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">Revisão Lapide</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="solar-lapide-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="solar-lapide-feitas" placeholder="Fiz (Qtd)" class="p-1 border rounded">
+                            </div>
+                        </div>
+                        <div class="p-2 border rounded-lg">
+                            <p class="font-bold mb-1">Inspeções ERGO e DDS</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="solar-inspecoes" placeholder="Inspeções Fiz" class="p-1 border rounded">
+                                <input type="number" id="solar-dds" placeholder="DDS Fiz" class="p-1 border rounded">
+                            </div>
+                        </div>
+                        <div class="p-2 border rounded-lg col-span-1 md:col-span-2">
+                            <p class="font-bold mb-1">CoErgo (Reunião 3x ao Ano)</p>
+                            <input type="number" id="solar-coergo" placeholder="Qtd Realizadas neste ano (ex: 2)" class="p-1 border rounded w-full">
+                        </div>
+                    </div>
+                </form>
+
+                <button onclick="salvarAtividades()" class="w-full bg-slate-800 text-white font-bold p-2.5 rounded-lg text-sm hover:bg-slate-900">
+                    Salvar Registros
+                </button>
+            </section>
+
+            <!-- BOTÃO PARA GERAR RELATÓRIO EM PPTX -->
+            <section class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-5 rounded-xl shadow text-center space-y-3">
+                <h2 class="text-lg font-bold">📊 Baixar Relatório Mensal Formatado</h2>
+                <p class="text-xs text-blue-200">Gere um arquivo PowerPoint (.pptx) com os gráficos e tabelas consolidados.</p>
+                <button onclick="exportarPPTX()" class="bg-amber-400 text-slate-900 font-extrabold px-6 py-3 rounded-xl text-sm shadow-lg hover:bg-amber-300 transition-all">
+                    📥 Baixar Relatório em PowerPoint
+                </button>
+            </section>
+        </div>
+
+        <!-- ================= VISÃO ADMIN (EDITAR E GERENCIAR) ================= -->
+        <div id="secao-admin" class="hidden space-y-6">
+
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                <h2 class="text-md font-bold text-amber-900 flex items-center gap-2">
+                    <span>⚙️</span> Painel de Edição e Correções
+                </h2>
+                <p class="text-xs text-amber-700 mt-1">
+                    Edite ou remova registros caso tenham sido inseridos incorretamente.
+                </p>
+            </div>
+
+            <!-- TABELA DE GERENCIAMENTO DE PONTOS -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-3">
+                <h3 class="text-sm font-bold text-slate-700 border-b pb-2">🕒 Registro de Ponto Batidos</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 border-b">
+                                <th class="p-2">Empresa</th>
+                                <th class="p-2">Data/Hora</th>
+                                <th class="p-2">Entrada</th>
+                                <th class="p-2">Saída</th>
+                                <th class="p-2">Total Horas</th>
+                                <th class="p-2 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-admin-ponto">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TABELA DE GERENCIAMENTO DE ATIVIDADES BECONAL -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-3">
+                <h3 class="text-sm font-bold text-blue-900 border-b pb-2">🏢 Beconal - Atividades Digitadas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="admin-beconal-container">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </section>
+
+            <!-- TABELA DE GERENCIAMENTO DE ATIVIDADES GRUPO ENS -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-3">
+                <h3 class="text-sm font-bold text-purple-900 border-b pb-2">🏢 Grupo ENS - Atividades Digitadas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="admin-ens-container">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </section>
+
+            <!-- TABELA DE GERENCIAMENTO DE ATIVIDADES SOLAR -->
+            <section class="bg-white p-4 rounded-xl shadow space-y-3">
+                <h3 class="text-sm font-bold text-red-900 border-b pb-2">🏢 Solar Coca-Cola - Atividades Digitadas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="admin-solar-container">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
