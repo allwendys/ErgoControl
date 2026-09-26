@@ -115,8 +115,9 @@ async function registrarPonto() {
     const { data, error } = await _supabase.from('pontos').insert([novoPonto]).select();
 
     if (error) {
-        alert("Erro ao salvar no banco do Supabase!");
-        console.error(error);
+        // Mostra o erro detalhado no console para sabermos o que falhou
+        console.error("Erro detalhado do Supabase:", error);
+        alert(`Erro ao salvar no Supabase: ${error.message || error.details || 'Verifique o console'}`);
     } else {
         dadosApp.pontoHistorico.push(data[0]);
         document.getElementById('ponto-entrada').value = '';
