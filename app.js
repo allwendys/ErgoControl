@@ -303,13 +303,11 @@ async function gerarRelatorioPPTX() {
     let pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_16x9';
 
-    // Cores padrão do tema original
     const COR_AZUL_ESCURO = "1E3A8A";
-    const COR_AZUL_CLARO = "F1F5F9";
     const COR_BRANCO = "FFFFFF";
     const COR_CINZA_TEXTO = "334155";
 
-    // 1. Slide 1: Capa (Fundo Azul Escuro)
+    // 1. Slide de Capa
     let slideCapa = pptx.addSlide();
     slideCapa.background = { color: COR_AZUL_ESCURO };
     
@@ -322,7 +320,32 @@ async function gerarRelatorioPPTX() {
         fontSize: 16, color: "93C5FD"
     });
 
-    // 2. Slide 2: Beconal - Resumo de Atividades
+    // 2. Slide Extra: Resumo de Banco de Horas
+    let slideBancoHoras = pptx.addSlide();
+    slideBancoHoras.addText("Resumo de Banco de Horas", {
+        x: 0.6, y: 0.5, w: 9, h: 0.6,
+        fontSize: 22, bold: true, color: COR_AZUL_ESCURO
+    });
+
+    let dadosHorasTabela = [
+        [
+            { text: "Empresa", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Registradas", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Meta Mensal", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } }
+        ],
+        ["Beconal (3h/dia)", `${document.getElementById('hrs-beconal').innerText}h`, "60h"],
+        ["Grupo ENS (3x/sem)", `${document.getElementById('hrs-ens').innerText}h`, "36h"],
+        ["Solar Coca-Cola (1x/sem)", `${document.getElementById('hrs-solar').innerText}h`, "24h"]
+    ];
+
+    slideBancoHoras.addTable(dadosHorasTabela, {
+        x: 0.6, y: 1.5, w: 8.8,
+        border: { pt: 1, color: "CBD5E1" },
+        colW: [4.4, 2.2, 2.2],
+        fontSz: 12
+    });
+
+    // 3. Slide: Beconal - Resumo de Atividades
     let slideBeconal = pptx.addSlide();
     slideBeconal.addText("1ª Empresa: Beconal - Resumo de Atividades", {
         x: 0.6, y: 0.5, w: 9, h: 0.6,
@@ -346,7 +369,7 @@ async function gerarRelatorioPPTX() {
         fontSz: 12
     });
 
-    // 3. Slide 3: Grupo ENS - Mapeamento e Pendências
+    // 4. Slide: Grupo ENS - Mapeamento e Pendências
     let slideEns = pptx.addSlide();
     slideEns.addText("2ª Empresa: Grupo ENS - Mapeamento e Pendências", {
         x: 0.6, y: 0.5, w: 9, h: 0.6,
@@ -373,7 +396,7 @@ async function gerarRelatorioPPTX() {
         fontSz: 12
     });
 
-    // 4. Slide 4: Solar Coca-Cola
+    // 5. Slide: Solar Coca-Cola
     let slideSolar = pptx.addSlide();
     slideSolar.addText("3ª Empresa: Solar Coca-Cola", {
         x: 0.6, y: 0.5, w: 9, h: 0.6,
@@ -406,5 +429,5 @@ async function gerarRelatorioPPTX() {
         fontSize: 16, bold: true, color: COR_CINZA_TEXTO, align: "center"
     });
 
-    await pptx.writeFile({ fileName: `Relatorio_Empresas_${Date.now()}.pptx` });
+    await pptx.writeFile({ fileName: `Relatorio_ErgoControl_${Date.now()}.pptx` });
 }
