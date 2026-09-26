@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ErgoControl</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
@@ -207,10 +210,10 @@
 
             <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
                 <h2 class="text-md font-bold text-amber-900 flex items-center gap-2">
-                    <span>⚙️</span> Painel de Edição e Correções
+                    <span>⚙️</span> Painel de Edição e Correções (Supabase)
                 </h2>
                 <p class="text-xs text-amber-700 mt-1">
-                    Edite ou remova registros caso tenham sido inseridos incorretamente.
+                    Edite ou remova registros gravados no banco de dados.
                 </p>
             </div>
 
@@ -222,7 +225,7 @@
                         <thead>
                             <tr class="bg-slate-100 text-slate-600 border-b">
                                 <th class="p-2">Empresa</th>
-                                <th class="p-2">Data/Hora</th>
+                                <th class="p-2">Data</th>
                                 <th class="p-2">Entrada</th>
                                 <th class="p-2">Saída</th>
                                 <th class="p-2">Total Horas</th>

@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/gerar-pptx",
+      "destination": "/api/gerar-pptx.js"
+    }
+  ]
+}

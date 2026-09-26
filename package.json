@@ -1,13 +1,12 @@
 {
-  "name": "gestao-tres-empresas",
+  "name": "ergocontrol",
   "version": "1.0.0",
-  "description": "Sistema de Gestão de Ponto, Atividades e Relatórios em PPTX",
-  "main": "server.js",
+  "description": "Sistema de Gestão Ergônomica Multi-Empresas",
+  "main": "api/gerar-pptx.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node api/gerar-pptx.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
     "pptxgenjs": "^3.12.0"
   }
 }

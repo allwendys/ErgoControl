@@ -1,6 +1,10 @@
-// Estado local da aplicação com histórico de pontos em lista
+// CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas credenciais do painel do Supabase)
+const SUPABASE_URL = "https://xwmbdqhombbtfwpnxzzy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_L7S2l8_r9BjV0iIAWB6pQw_XvBf5ZEL";
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let dadosApp = {
-    pontoHistorico: [], // Armazena cada batida de ponto individual { id, empresa, data, entrada, saída, horas }
+    pontoHistorico: [],
     beconal: { cineseValores: [0, 0, 0, 0], aetTotal: 0, coletaTotal: 0, ddsTemas: [] },
     ens: {
         gravidasTotal: 0, gravidasAvaliadas: 0,
@@ -12,10 +16,35 @@ let dadosApp = {
 };
 
 // Ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     verificarAlertas();
-    atualizarTelaPonto();
+    await carregarDadosDoSupabase();
 });
+
+// Carrega os dados direto do Supabase
+async function carregarDadosDoSupabase() {
+    try {
+        // 1. Buscar Pontos
+        const { data: pontos, error: errPontos } = await _supabase.from('pontos').select('*');
+        if (!errPontos && pontos) {
+            dadosApp.pontoHistorico = pontos;
+        }
+
+        // 2. Buscar Atividades
+        const { data: atividades, error: errAtiv } = await _supabase.from('atividades').select('*');
+        if (!errAtiv && atividades) {
+            atividades.forEach(a => {
+                if (a.empresa === 'beconal') dadosApp.beconal = a.dados;
+                if (a.empresa === 'ens') dadosApp.ens = a.dados;
+                if (a.empresa === 'solar') dadosApp.solar = a.dados;
+            });
+        }
+
+        atualizarTelaPonto();
+    } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+    }
+}
 
 // Alterna entre a visão de lançamentos e o Painel de Administração
 function alternarVisao(visao) {
@@ -32,7 +61,6 @@ function alternarVisao(visao) {
     }
 }
 
-// Checa os avisos configurados baseados no dia atual
 function verificarAlertas() {
     const hoje = new Date();
     const dia = hoje.getDate();
@@ -59,59 +87,58 @@ function confirmarAviso() {
     document.getElementById('alert-bar').classList.add('hidden');
 }
 
-// Lógica de Registro de Ponto
-function registrarPonto() {
+// Registrar Ponto no Supabase
+async function registrarPonto() {
     const empresa = document.getElementById('ponto-empresa').value;
     const entrada = document.getElementById('ponto-entrada').value;
     const saida = document.getElementById('ponto-saida').value;
 
-    if (!entrada || !saida) {
-        return alert('Por favor, informe os horários de entrada e saída.');
-    }
+    if (!entrada || !saida) return alert('Por favor, informe entrada e saída.');
 
     const [hEntrada, mEntrada] = entrada.split(':').map(Number);
     const [hSaida, mSaida] = saida.split(':').map(Number);
 
     let diferencaMinutos = (hSaida * 60 + mSaida) - (hEntrada * 60 + mEntrada);
-    if (diferencaMinutos < 0) diferencaMinutos += 24 * 60; // Trata virada de dia
+    if (diferencaMinutos < 0) diferencaMinutos += 24 * 60;
 
     if (diferencaMinutos === 0) return alert('Horários de entrada e saída não podem ser idênticos.');
 
     const horasCalculadas = Number((diferencaMinutos / 60).toFixed(2));
-
-    // Salva o registro no histórico
-    dadosApp.pontoHistorico.push({
-        id: Date.now(),
-        empresa: empresa,
+    const novoPonto = {
+        empresa,
         data: new Date().toLocaleDateString('pt-BR'),
-        entrada: entrada,
-        saida: saida,
+        entrada,
+        saida,
         horas: horasCalculadas
-    });
+    };
 
-    document.getElementById('ponto-entrada').value = '';
-    document.getElementById('ponto-saida').value = '';
+    const { data, error } = await _supabase.from('pontos').insert([novoPonto]).select();
 
-    atualizarTelaPonto();
-    alert('✅ Ponto registrado com sucesso!');
+    if (error) {
+        alert("Erro ao salvar no banco do Supabase!");
+        console.error(error);
+    } else {
+        dadosApp.pontoHistorico.push(data[0]);
+        document.getElementById('ponto-entrada').value = '';
+        document.getElementById('ponto-saida').value = '';
+        atualizarTelaPonto();
+        alert('✅ Ponto salvo no Supabase com sucesso!');
+    }
 }
 
 function atualizarTelaPonto() {
-    // Soma total de horas por empresa
     const totais = { beconal: 0, ens: 0, solar: 0 };
-    dadosApp.pontoHistorico.forEach(p => totais[p.empresa] += p.horas);
+    dadosApp.pontoHistorico.forEach(p => totais[p.empresa] += Number(p.horas));
 
     document.getElementById('hrs-beconal').innerText = Number(totais.beconal.toFixed(2));
     document.getElementById('hrs-ens').innerText = Number(totais.ens.toFixed(2));
     document.getElementById('hrs-solar').innerText = Number(totais.solar.toFixed(2));
 
-    // Regras de Folga
     document.getElementById('folga-beconal').innerText = `${Math.max(0, Number((totais.beconal - 60).toFixed(2)))}h`;
     document.getElementById('folga-ens').innerText = `${Math.max(0, Number((totais.ens - 36).toFixed(2)))}h`;
     document.getElementById('folga-solar').innerText = `${Math.max(0, Number((totais.solar - 24).toFixed(2)))}h`;
 }
 
-// Controle de Abas
 function mudarAba(empresa) {
     document.querySelectorAll('.aba-btn').forEach(btn => btn.className = 'aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700');
     
@@ -123,16 +150,14 @@ function mudarAba(empresa) {
     document.getElementById(`form-${empresa}`).classList.remove('hidden');
 }
 
-// Salvar Formulários das Empresas
-function salvarAtividades() {
+// Salvar/Atualizar Atividades no Supabase
+async function salvarAtividades() {
     // Beconal
     const sem = parseInt(document.getElementById('beconal-cinese-semana').value);
     const qtdCinese = parseInt(document.getElementById('beconal-cinese-qtd').value) || 0;
     dadosApp.beconal.cineseValores[sem] += qtdCinese;
-
     dadosApp.beconal.aetTotal += parseInt(document.getElementById('beconal-aet').value) || 0;
     dadosApp.beconal.coletaTotal += parseInt(document.getElementById('beconal-coleta').value) || 0;
-    
     const ddsTema = document.getElementById('beconal-dds').value;
     if (ddsTema) dadosApp.beconal.ddsTemas.push(ddsTema);
 
@@ -153,18 +178,21 @@ function salvarAtividades() {
     dadosApp.solar.ddsFeitos = parseInt(document.getElementById('solar-dds').value) || 0;
     dadosApp.solar.coergoRealizadas = parseInt(document.getElementById('solar-coergo').value) || 0;
 
-    alert('✅ Registros salvos com sucesso!');
+    await _supabase.from('atividades').upsert([
+        { empresa: 'beconal', dados: dadosApp.beconal },
+        { empresa: 'ens', dados: dadosApp.ens },
+        { empresa: 'solar', dados: dadosApp.solar }
+    ]);
+
+    alert('✅ Registros salvos no Supabase!');
 }
 
-// ================= PAINEL ADMIN: RENDERIZAR E EDITAR DADOS =================
-
 function carregarPainelAdmin() {
-    // 1. Tabela de Pontos
     const tbPonto = document.getElementById('tabela-admin-ponto');
     tbPonto.innerHTML = '';
 
     if (dadosApp.pontoHistorico.length === 0) {
-        tbPonto.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">Nenhum registro de ponto lançado ainda.</td></tr>';
+        tbPonto.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">Nenhum ponto registrado.</td></tr>';
     } else {
         dadosApp.pontoHistorico.forEach(p => {
             const tr = document.createElement('tr');
@@ -183,98 +211,55 @@ function carregarPainelAdmin() {
         });
     }
 
-    // 2. Beconal Admin Campos
-    const bContainer = document.getElementById('admin-beconal-container');
-    bContainer.innerHTML = `
+    // Beconal Admin
+    document.getElementById('admin-beconal-container').innerHTML = `
         <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">AET Concluídas (Total)</label>
-            <input type="number" value="${dadosApp.beconal.aetTotal}" onchange="dadosApp.beconal.aetTotal = parseInt(this.value) || 0" class="p-1 border rounded w-full">
+            <label class="font-bold block mb-1">AET Concluídas</label>
+            <input type="number" value="${dadosApp.beconal.aetTotal}" onchange="dadosApp.beconal.aetTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded w-full">
         </div>
         <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">Coletas de Dados AET (Total)</label>
-            <input type="number" value="${dadosApp.beconal.coletaTotal}" onchange="dadosApp.beconal.coletaTotal = parseInt(this.value) || 0" class="p-1 border rounded w-full">
-        </div>
-        <div class="p-2 border rounded bg-slate-50 col-span-1 md:col-span-2">
-            <label class="font-bold block mb-1">Cinese por Semana [Sem 1, Sem 2, Sem 3, Sem 4]</label>
-            <div class="grid grid-cols-4 gap-2">
-                ${dadosApp.beconal.cineseValores.map((v, idx) => `
-                    <input type="number" value="${v}" onchange="dadosApp.beconal.cineseValores[${idx}] = parseInt(this.value) || 0" class="p-1 border rounded text-center">
-                `).join('')}
-            </div>
+            <label class="font-bold block mb-1">Coletas de Dados AET</label>
+            <input type="number" value="${dadosApp.beconal.coletaTotal}" onchange="dadosApp.beconal.coletaTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded w-full">
         </div>
     `;
 
-    // 3. ENS Admin Campos
-    const ensContainer = document.getElementById('admin-ens-container');
-    ensContainer.innerHTML = `
+    // ENS Admin
+    document.getElementById('admin-ens-container').innerHTML = `
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Grávidas (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.gravidasTotal}" onchange="dadosApp.ens.gravidasTotal = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.gravidasAvaliadas}" onchange="dadosApp.ens.gravidasAvaliadas = parseInt(this.value)||0" class="p-1 border rounded">
-            </div>
-        </div>
-        <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">PRAT / Restrito (Tem / Avaliei)</label>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.pratTotal}" onchange="dadosApp.ens.pratTotal = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.pratAvaliadas}" onchange="dadosApp.ens.pratAvaliadas = parseInt(this.value)||0" class="p-1 border rounded">
-            </div>
-        </div>
-        <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">Retorno ao Trabalho (Tem / Avaliei)</label>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.retornoTotal}" onchange="dadosApp.ens.retornoTotal = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.retornoAvaliadas}" onchange="dadosApp.ens.retornoAvaliadas = parseInt(this.value)||0" class="p-1 border rounded">
-            </div>
-        </div>
-        <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">Investigação Queixa (Tem / Avaliei)</label>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.queixasTotal}" onchange="dadosApp.ens.queixasTotal = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.queixasAvaliadas}" onchange="dadosApp.ens.queixasAvaliadas = parseInt(this.value)||0" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.gravidasTotal}" onchange="dadosApp.ens.gravidasTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.gravidasAvaliadas}" onchange="dadosApp.ens.gravidasAvaliadas = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
             </div>
         </div>
     `;
 
-    // 4. Solar Admin Campos
-    const solarContainer = document.getElementById('admin-solar-container');
-    solarContainer.innerHTML = `
+    // Solar Admin
+    document.getElementById('admin-solar-container').innerHTML = `
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Revisão Lapide (Tem / Fiz)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.solar.lapideTotal}" onchange="dadosApp.solar.lapideTotal = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.solar.lapideFeitas}" onchange="dadosApp.solar.lapideFeitas = parseInt(this.value)||0" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.solar.lapideTotal}" onchange="dadosApp.solar.lapideTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.solar.lapideFeitas}" onchange="dadosApp.solar.lapideFeitas = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
             </div>
-        </div>
-        <div class="p-2 border rounded bg-slate-50">
-            <label class="font-bold block mb-1">Inspeções ERGO e DDS Fiz</label>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.solar.inspecoesErgo}" onchange="dadosApp.solar.inspecoesErgo = parseInt(this.value)||0" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.solar.ddsFeitos}" onchange="dadosApp.solar.ddsFeitos = parseInt(this.value)||0" class="p-1 border rounded">
-            </div>
-        </div>
-        <div class="p-2 border rounded bg-slate-50 col-span-1 md:col-span-2">
-            <label class="font-bold block mb-1">CoErgo Realizadas no Ano (meta de 3)</label>
-            <input type="number" value="${dadosApp.solar.coergoRealizadas}" onchange="dadosApp.solar.coergoRealizadas = parseInt(this.value)||0" class="p-1 border rounded w-full">
         </div>
     `;
 }
 
-function excluirPonto(id) {
-    if (confirm('Deseja realmente excluir este lançamento de ponto?')) {
+async function excluirPonto(id) {
+    if (confirm('Excluir este ponto do banco de dados?')) {
+        await _supabase.from('pontos').delete().eq('id', id);
         dadosApp.pontoHistorico = dadosApp.pontoHistorico.filter(p => p.id !== id);
         carregarPainelAdmin();
         atualizarTelaPonto();
     }
 }
 
-// Chamada para o Servidor fazer o download do PPTX
+// Chamada para a Serverless Function na Vercel para baixar o PPTX
 async function exportarPPTX() {
     const dataAtual = new Date();
     dadosApp.mesAno = `${dataAtual.getMonth() + 1}/${dataAtual.getFullYear()}`;
 
-    // Monta o objeto formatado esperado pelo backend
     const payload = {
         mesAno: dadosApp.mesAno,
         beconal: dadosApp.beconal,
