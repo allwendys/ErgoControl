@@ -54,11 +54,11 @@
                         <p class="text-xl font-black text-blue-900"><span id="hrs-beconal">0</span>h / 60h mês</p>
                         <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-beconal" class="text-emerald-600">0h</b></p>
                     </div>
-                    <!-- GRUPO ENS -->
+                    <!-- GRUPO EMS -->
                     <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                        <p class="text-xs font-bold text-purple-800">Grupo ENS (3x/sem - 3h)</p>
-                        <p class="text-xl font-black text-purple-900"><span id="hrs-ens">0</span>h / 36h mês</p>
-                        <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-ens" class="text-emerald-600">0h</b></p>
+                        <p class="text-xs font-bold text-purple-800">Grupo EMS (3x/sem - 3h)</p>
+                        <p class="text-xl font-black text-purple-900"><span id="hrs-ems">0</span>h / 36h mês</p>
+                        <p class="text-xs text-slate-500 mt-1">Saldo Folga: <b id="folga-ems" class="text-emerald-600">0h</b></p>
                     </div>
                     <!-- SOLAR COCA-COLA -->
                     <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -77,7 +77,7 @@
                         <label class="text-xs font-bold block mb-1 text-slate-600">Empresa</label>
                         <select id="ponto-empresa" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
                             <option value="beconal">Beconal</option>
-                            <option value="ens">Grupo ENS</option>
+                            <option value="ems">Grupo EMS</option>
                             <option value="solar">Solar Coca-Cola</option>
                         </select>
                     </div>
@@ -101,7 +101,7 @@
                 
                 <div class="flex gap-2 border-b pb-2">
                     <button onclick="mudarAba('beconal')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-blue-900 text-white" id="tab-beconal">Beconal</button>
-                    <button onclick="mudarAba('ens')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700" id="tab-ens">Grupo ENS</button>
+                    <button onclick="mudarAba('ems')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700" id="tab-ems">Grupo EMS</button>
                     <button onclick="mudarAba('solar')" class="aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700" id="tab-solar">Solar Coca-Cola</button>
                 </div>
 
@@ -135,35 +135,35 @@
                     </div>
                 </form>
 
-                <!-- FORM GRUPO ENS -->
-                <form id="form-ens" class="space-y-3 hidden">
+                <!-- FORM GRUPO EMS -->
+                <form id="form-ems" class="space-y-3 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div class="p-2 border rounded-lg">
                             <p class="font-bold mb-1">Grávidas</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="ens-gravidas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
-                                <input type="number" id="ens-gravidas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-gravidas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-gravidas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
                             </div>
                         </div>
                         <div class="p-2 border rounded-lg">
                             <p class="font-bold mb-1">PRAT / Restrito</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="ens-prat-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
-                                <input type="number" id="ens-prat-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-prat-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-prat-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
                             </div>
                         </div>
                         <div class="p-2 border rounded-lg">
                             <p class="font-bold mb-1">Retorno ao Trabalho</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="ens-retorno-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
-                                <input type="number" id="ens-retorno-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-retorno-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-retorno-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
                             </div>
                         </div>
                         <div class="p-2 border rounded-lg">
                             <p class="font-bold mb-1">Investigação de Queixa</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="ens-queixas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
-                                <input type="number" id="ens-queixas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-queixas-total" placeholder="Tem (Qtd)" class="p-1 border rounded">
+                                <input type="number" id="ems-queixas-avaliadas" placeholder="Avaliei (Qtd)" class="p-1 border rounded">
                             </div>
                         </div>
                     </div>
@@ -250,10 +250,10 @@
                 </div>
             </section>
 
-            <!-- TABELA DE GERENCIAMENTO DE ATIVIDADES GRUPO ENS -->
+            <!-- TABELA DE GERENCIAMENTO DE ATIVIDADES GRUPO EMS -->
             <section class="bg-white p-4 rounded-xl shadow space-y-3">
-                <h3 class="text-sm font-bold text-purple-900 border-b pb-2">🏢 Grupo ENS - Atividades Digitadas</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="admin-ens-container">
+                <h3 class="text-sm font-bold text-purple-900 border-b pb-2">🏢 Grupo EMS - Atividades Digitadas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="admin-ems-container">
                     <!-- Preenchido via JavaScript -->
                 </div>
             </section>

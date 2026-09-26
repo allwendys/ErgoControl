@@ -6,7 +6,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let dadosApp = {
     pontoHistorico: [],
     beconal: { cineseValores: [0, 0, 0, 0], aetTotal: 0, coletaTotal: 0, ddsTemas: [] },
-    ens: {
+    ems: {
         gravidasTotal: 0, gravidasAvaliadas: 0,
         pratTotal: 0, pratAvaliadas: 0,
         retornoTotal: 0, retornoAvaliadas: 0,
@@ -35,7 +35,7 @@ async function carregarDadosDoSupabase() {
         if (!errAtiv && atividades) {
             atividades.forEach(a => {
                 if (a.empresa === 'beconal') dadosApp.beconal = a.dados;
-                if (a.empresa === 'ens') dadosApp.ens = a.dados;
+                if (a.empresa === 'ems') dadosApp.ems = a.dados;
                 if (a.empresa === 'solar') dadosApp.solar = a.dados;
             });
         }
@@ -128,17 +128,17 @@ async function registrarPonto() {
 }
 
 function atualizarTelaPonto() {
-    const totais = { beconal: 0, ens: 0, solar: 0 };
+    const totais = { beconal: 0, ems: 0, solar: 0 };
     dadosApp.pontoHistorico.forEach(p => totais[p.empresa] += Number(p.horas));
 
     // Atualiza as horas registradas na tela
-    document.getElementById('hrs-beconal').innerText = Number(totais.beconal.toFixed(2));
-    document.getElementById('hrs-ens').innerText = Number(totais.ens.toFixed(2));
+    document.getElementById('hrs-ems').innerText = Number(totais.beconal.toFixed(2));
+    document.getElementById('hrs-ems').innerText = Number(totais.ems.toFixed(2));
     document.getElementById('hrs-solar').innerText = Number(totais.solar.toFixed(2));
 
     // Saldo de folgas (Horas que excedem a meta do mês)
     document.getElementById('folga-beconal').innerText = `${Math.max(0, Number((totais.beconal - 60).toFixed(2)))}h`;
-    document.getElementById('folga-ens').innerText = `${Math.max(0, Number((totais.ens - 36).toFixed(2)))}h`;
+    document.getElementById('folga-ems').innerText = `${Math.max(0, Number((totais.ems - 36).toFixed(2)))}h`;
     document.getElementById('folga-solar').innerText = `${Math.max(0, Number((totais.solar - 24).toFixed(2)))}h`;
 }
 
@@ -146,7 +146,7 @@ function mudarAba(empresa) {
     document.querySelectorAll('.aba-btn').forEach(btn => btn.className = 'aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-slate-200 text-slate-700');
     
     document.getElementById('form-beconal').classList.add('hidden');
-    document.getElementById('form-ens').classList.add('hidden');
+    document.getElementById('form-ems').classList.add('hidden');
     document.getElementById('form-solar').classList.add('hidden');
 
     document.getElementById(`tab-${empresa}`).className = 'aba-btn text-xs md:text-sm font-bold py-1 px-3 rounded-lg bg-blue-900 text-white';
@@ -164,15 +164,15 @@ async function salvarAtividades() {
     const ddsTema = document.getElementById('beconal-dds').value;
     if (ddsTema) dadosApp.beconal.ddsTemas.push(ddsTema);
 
-    // ENS
-    dadosApp.ens.gravidasTotal = parseInt(document.getElementById('ens-gravidas-total').value) || 0;
-    dadosApp.ens.gravidasAvaliadas = parseInt(document.getElementById('ens-gravidas-avaliadas').value) || 0;
-    dadosApp.ens.pratTotal = parseInt(document.getElementById('ens-prat-total').value) || 0;
-    dadosApp.ens.pratAvaliadas = parseInt(document.getElementById('ens-prat-avaliadas').value) || 0;
-    dadosApp.ens.retornoTotal = parseInt(document.getElementById('ens-retorno-total').value) || 0;
-    dadosApp.ens.retornoAvaliadas = parseInt(document.getElementById('ens-retorno-avaliadas').value) || 0;
-    dadosApp.ens.queixasTotal = parseInt(document.getElementById('ens-queixas-total').value) || 0;
-    dadosApp.ens.queixasAvaliadas = parseInt(document.getElementById('ens-queixas-avaliadas').value) || 0;
+    // EMS
+    dadosApp.ems.gravidasTotal = parseInt(document.getElementById('ems-gravidas-total').value) || 0;
+    dadosApp.ems.gravidasAvaliadas = parseInt(document.getElementById('ems-gravidas-avaliadas').value) || 0;
+    dadosApp.ems.pratTotal = parseInt(document.getElementById('ems-prat-total').value) || 0;
+    dadosApp.ems.pratAvaliadas = parseInt(document.getElementById('ems-prat-avaliadas').value) || 0;
+    dadosApp.ems.retornoTotal = parseInt(document.getElementById('ems-retorno-total').value) || 0;
+    dadosApp.ems.retornoAvaliadas = parseInt(document.getElementById('ems-retorno-avaliadas').value) || 0;
+    dadosApp.ems.queixasTotal = parseInt(document.getElementById('ems-queixas-total').value) || 0;
+    dadosApp.ems.queixasAvaliadas = parseInt(document.getElementById('ems-queixas-avaliadas').value) || 0;
 
     // Solar
     dadosApp.solar.lapideTotal = parseInt(document.getElementById('solar-lapide-total').value) || 0;
@@ -183,7 +183,7 @@ async function salvarAtividades() {
 
     await _supabase.from('atividades').upsert([
         { empresa: 'beconal', dados: dadosApp.beconal },
-        { empresa: 'ens', dados: dadosApp.ens },
+        { empresa: 'ems', dados: dadosApp.ems },
         { empresa: 'solar', dados: dadosApp.solar }
     ], { onConflict: 'empresa' });
 
@@ -226,34 +226,34 @@ function carregarPainelAdmin() {
         </div>
     `;
 
-    // ENS Admin
-    document.getElementById('admin-ens-container').innerHTML = `
+    // EMS Admin
+    document.getElementById('admin-ems-container').innerHTML = `
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Grávidas (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.gravidasTotal}" onchange="dadosApp.ens.gravidasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.gravidasAvaliadas}" onchange="dadosApp.ens.gravidasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.gravidasTotal}" onchange="dadosApp.ems.gravidasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.gravidasAvaliadas}" onchange="dadosApp.ems.gravidasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">PRAT / Restrito (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.pratTotal}" onchange="dadosApp.ens.pratTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.pratAvaliadas}" onchange="dadosApp.ens.pratAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.pratTotal}" onchange="dadosApp.ems.pratTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.pratAvaliadas}" onchange="dadosApp.ems.pratAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Retorno ao Trabalho (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.retornoTotal}" onchange="dadosApp.ens.retornoTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.retornoAvaliadas}" onchange="dadosApp.ens.retornoAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.retornoTotal}" onchange="dadosApp.ems.retornoTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.retornoAvaliadas}" onchange="dadosApp.ems.retornoAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Investigação de Queixa (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.queixasTotal}" onchange="dadosApp.ens.queixasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.queixasAvaliadas}" onchange="dadosApp.ens.queixasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.queixasTotal}" onchange="dadosApp.ems.queixasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ems.queixasAvaliadas}" onchange="dadosApp.ems.queixasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
     `;
@@ -285,7 +285,7 @@ function carregarPainelAdmin() {
 async function salvarAtividadesAdmin() {
     await _supabase.from('atividades').upsert([
         { empresa: 'beconal', dados: dadosApp.beconal },
-        { empresa: 'ens', dados: dadosApp.ens },
+        { empresa: 'ems', dados: dadosApp.ems },
         { empresa: 'solar', dados: dadosApp.solar }
     ], { onConflict: 'empresa' });
 }
@@ -335,7 +335,7 @@ async function gerarRelatorioPPTX() {
             { text: "Meta Mensal", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } }
         ],
         ["Beconal (3h/dia)", `${document.getElementById('hrs-beconal').innerText}h`, "60h"],
-        ["Grupo ENS (3x/sem)", `${document.getElementById('hrs-ens').innerText}h`, "36h"],
+        ["Grupo EMS (3x/sem)", `${document.getElementById('hrs-ems').innerText}h`, "36h"],
         ["Solar Coca-Cola (1x/sem)", `${document.getElementById('hrs-solar').innerText}h`, "24h"]
     ];
 
@@ -370,27 +370,27 @@ async function gerarRelatorioPPTX() {
         fontSz: 12
     });
 
-    // 4. Slide: Grupo ENS - Mapeamento e Pendências
-    let slideEns = pptx.addSlide();
-    slideEns.addText("2ª Empresa: Grupo ENS - Mapeamento e Pendências", {
+    // 4. Slide: Grupo EMS - Mapeamento e Pendências
+    let slideEms = pptx.addSlide();
+    slideEms.addText("2ª Empresa: Grupo EMS - Mapeamento e Pendências", {
         x: 0.6, y: 0.5, w: 9, h: 0.6,
         fontSize: 22, bold: true, color: COR_AZUL_ESCURO
     });
 
-    let dadosEnsTabela = [
+    let dadosEmsTabela = [
         [
             { text: "Categoria", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
             { text: "Existentes", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
             { text: "Avaliados", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
             { text: "Pendentes", options: { bold: true, fill: "DC2626", color: COR_BRANCO } }
         ],
-        ["Grávidas", dadosApp.ens.gravidasTotal, dadosApp.ens.gravidasAvaliadas, Math.max(0, dadosApp.ens.gravidasTotal - dadosApp.ens.gravidasAvaliadas)],
-        ["PRAT / Restrito", dadosApp.ens.pratTotal, dadosApp.ens.pratAvaliadas, Math.max(0, dadosApp.ens.pratTotal - dadosApp.ens.pratAvaliadas)],
-        ["Retorno ao Trabalho", dadosApp.ens.retornoTotal, dadosApp.ens.retornoAvaliadas, Math.max(0, dadosApp.ens.retornoTotal - dadosApp.ens.retornoAvaliadas)],
-        ["Investigação de Queixa", dadosApp.ens.queixasTotal, dadosApp.ens.queixasAvaliadas, Math.max(0, dadosApp.ens.queixasTotal - dadosApp.ens.queixasAvaliadas)]
+        ["Grávidas", dadosApp.ems.gravidasTotal, dadosApp.ems.gravidasAvaliadas, Math.max(0, dadosApp.ems.gravidasTotal - dadosApp.ems.gravidasAvaliadas)],
+        ["PRAT / Restrito", dadosApp.ems.pratTotal, dadosApp.ems.pratAvaliadas, Math.max(0, dadosApp.ems.pratTotal - dadosApp.ems.pratAvaliadas)],
+        ["Retorno ao Trabalho", dadosApp.ems.retornoTotal, dadosApp.ems.retornoAvaliadas, Math.max(0, dadosApp.ems.retornoTotal - dadosApp.ems.retornoAvaliadas)],
+        ["Investigação de Queixa", dadosApp.ems.queixasTotal, dadosApp.ems.queixasAvaliadas, Math.max(0, dadosApp.ems.queixasTotal - dadosApp.ems.queixasAvaliadas)]
     ];
 
-    slideEns.addTable(dadosEnsTabela, {
+    slideEms.addTable(dadosEmsTabela, {
         x: 0.6, y: 1.5, w: 8.8,
         border: { pt: 1, color: "CBD5E1" },
         colW: [3.2, 1.8, 1.8, 2.0],
