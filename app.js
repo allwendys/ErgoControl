@@ -303,40 +303,108 @@ async function gerarRelatorioPPTX() {
     let pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_16x9';
 
-    // Slide 1: Capa
+    // Cores padrão do tema original
+    const COR_AZUL_ESCURO = "1E3A8A";
+    const COR_AZUL_CLARO = "F1F5F9";
+    const COR_BRANCO = "FFFFFF";
+    const COR_CINZA_TEXTO = "334155";
+
+    // 1. Slide 1: Capa (Fundo Azul Escuro)
     let slideCapa = pptx.addSlide();
-    slideCapa.addText("Relatório de Horas & Ergonomia", {
-        x: 0.5, y: 1.5, w: '90%', h: 1,
-        fontSize: 28, bold: true, color: "1E293B", align: "center"
+    slideCapa.background = { color: COR_AZUL_ESCURO };
+    
+    slideCapa.addText("Relatório Mensal de Gestão e Ergonomia", {
+        x: 0.8, y: 2.2, w: '85%', h: 1.2,
+        fontSize: 32, bold: true, color: COR_BRANCO
     });
-    slideCapa.addText(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, {
-        x: 0.5, y: 2.5, w: '90%', h: 0.5,
-        fontSize: 14, color: "64748B", align: "center"
-    });
-
-    // Slide 2: Resumo das Empresas
-    let slideResumo = pptx.addSlide();
-    slideResumo.addText("Resumo de Banco de Horas", {
-        x: 0.5, y: 0.5, w: 9, h: 0.8,
-        fontSize: 20, bold: true, color: "0F172A"
+    slideCapa.addText(`Mês de Referência: ${new Date().getMonth() + 1}/${new Date().getFullYear()}`, {
+        x: 0.8, y: 3.6, w: '85%', h: 0.5,
+        fontSize: 16, color: "93C5FD"
     });
 
-    let tabelaDados = [
+    // 2. Slide 2: Beconal - Resumo de Atividades
+    let slideBeconal = pptx.addSlide();
+    slideBeconal.addText("1ª Empresa: Beconal - Resumo de Atividades", {
+        x: 0.6, y: 0.5, w: 9, h: 0.6,
+        fontSize: 22, bold: true, color: COR_AZUL_ESCURO
+    });
+
+    let dadosBeconalTabela = [
         [
-            { text: "Empresa", options: { bold: true, fill: "F1F5F9" } },
-            { text: "Registradas", options: { bold: true, fill: "F1F5F9" } },
-            { text: "Meta Mensal", options: { bold: true, fill: "F1F5F9" } }
+            { text: "Atividade", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Quantidade Total", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } }
         ],
-        ["Beconal (3h/dia)", `${document.getElementById('hrs-beconal').innerText}h`, "60h"],
-        ["Grupo ENS (3x/sem)", `${document.getElementById('hrs-ens').innerText}h`, "36h"],
-        ["Solar Coca-Cola (1x/sem)", `${document.getElementById('hrs-solar').innerText}h`, "24h"]
+        ["AETs Concluídas", dadosApp.beconal.aetTotal || 0],
+        ["Coletas de Dados AET", dadosApp.beconal.coletaTotal || 0],
+        ["Temas de DDS Abordados", dadosApp.beconal.ddsTemas.length > 0 ? dadosApp.beconal.ddsTemas[dadosApp.beconal.ddsTemas.length - 1] : "Nenhum registrado"]
     ];
 
-    slideResumo.addTable(tabelaDados, {
-        x: 0.5, y: 1.5, w: 9,
+    slideBeconal.addTable(dadosBeconalTabela, {
+        x: 0.6, y: 1.3, w: 8.8,
         border: { pt: 1, color: "CBD5E1" },
-        colW: [4.0, 2.5, 2.5]
+        colW: [5.8, 3.0],
+        fontSz: 12
     });
 
-    await pptx.writeFile({ fileName: `Relatorio_ErgoControl_${new Date().toISOString().slice(0,10)}.pptx` });
+    // 3. Slide 3: Grupo ENS - Mapeamento e Pendências
+    let slideEns = pptx.addSlide();
+    slideEns.addText("2ª Empresa: Grupo ENS - Mapeamento e Pendências", {
+        x: 0.6, y: 0.5, w: 9, h: 0.6,
+        fontSize: 22, bold: true, color: COR_AZUL_ESCURO
+    });
+
+    let dadosEnsTabela = [
+        [
+            { text: "Categoria", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Existentes", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Avaliados", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Pendentes", options: { bold: true, fill: "DC2626", color: COR_BRANCO } }
+        ],
+        ["Grávidas", dadosApp.ens.gravidasTotal, dadosApp.ens.gravidasAvaliadas, Math.max(0, dadosApp.ens.gravidasTotal - dadosApp.ens.gravidasAvaliadas)],
+        ["PRAT / Restrito", dadosApp.ens.pratTotal, dadosApp.ens.pratAvaliadas, Math.max(0, dadosApp.ens.pratTotal - dadosApp.ens.pratAvaliadas)],
+        ["Retorno ao Trabalho", dadosApp.ens.retornoTotal, dadosApp.ens.retornoAvaliadas, Math.max(0, dadosApp.ens.retornoTotal - dadosApp.ens.retornoAvaliadas)],
+        ["Investigação de Queixa", dadosApp.ens.queixasTotal, dadosApp.ens.queixasAvaliadas, Math.max(0, dadosApp.ens.queixasTotal - dadosApp.ens.queixasAvaliadas)]
+    ];
+
+    slideEns.addTable(dadosEnsTabela, {
+        x: 0.6, y: 1.5, w: 8.8,
+        border: { pt: 1, color: "CBD5E1" },
+        colW: [3.2, 1.8, 1.8, 2.0],
+        fontSz: 12
+    });
+
+    // 4. Slide 4: Solar Coca-Cola
+    let slideSolar = pptx.addSlide();
+    slideSolar.addText("3ª Empresa: Solar Coca-Cola", {
+        x: 0.6, y: 0.5, w: 9, h: 0.6,
+        fontSize: 22, bold: true, color: COR_AZUL_ESCURO
+    });
+
+    let pendentesLapide = Math.max(0, dadosApp.solar.lapideTotal - dadosApp.solar.lapideFeitas);
+    let dadosSolarTabela = [
+        [
+            { text: "Indicador", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } },
+            { text: "Quantidade", options: { bold: true, fill: COR_AZUL_ESCURO, color: COR_BRANCO } }
+        ],
+        ["Revisão Lapide - Total Que Tem", dadosApp.solar.lapideTotal],
+        ["Revisão Lapide - Realizadas", dadosApp.solar.lapideFeitas],
+        ["Revisão Lapide - Pendentes", pendentesLapide],
+        ["Inspeções ERGO Realizadas", dadosApp.solar.inspecoesErgo],
+        ["DDS Realizados", dadosApp.solar.ddsFeitos]
+    ];
+
+    slideSolar.addTable(dadosSolarTabela, {
+        x: 0.6, y: 1.3, w: 5.5,
+        border: { pt: 1, color: "CBD5E1" },
+        colW: [3.5, 2.0],
+        fontSz: 11
+    });
+
+    let progressoCoErgo = dadosApp.solar.coergoRealizadas ? Math.min(100, Math.round((dadosApp.solar.coergoRealizadas / 12) * 100)) : 0;
+    slideSolar.addText(`Progresso CoErgo Anual: ${progressoCoErgo}%`, {
+        x: 6.4, y: 2.5, w: 3.0, h: 0.8,
+        fontSize: 16, bold: true, color: COR_CINZA_TEXTO, align: "center"
+    });
+
+    await pptx.writeFile({ fileName: `Relatorio_Empresas_${Date.now()}.pptx` });
 }
