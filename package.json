@@ -1,11 +1,6 @@
 {
   "name": "ergocontrol",
   "version": "1.0.0",
-  "description": "Sistema de Gestão Ergônomica Multi-Empresas",
-  "main": "api/gerar-pptx.js",
-  "scripts": {
-    "start": "node api/gerar-pptx.js"
-  },
   "dependencies": {
     "pptxgenjs": "^3.12.0"
   }
