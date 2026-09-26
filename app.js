@@ -298,15 +298,12 @@ async function excluirPonto(id) {
     }
 }
 
-// Geração do Relatório PowerPoint diretamente pelo navegador (PptxGenJS)
+// CORREÇÃO: Nome unificado para gerarRelatorioPPTX (conforme chamado no HTML)
 async function gerarRelatorioPPTX() {
-    // 1. Instanciar o PptxGenJS
     let pptx = new PptxGenJS();
-
-    // Configurações do slide (16:9)
     pptx.layout = 'LAYOUT_16x9';
 
-    // 2. Criar o Slide 1: Capa
+    // Slide 1: Capa
     let slideCapa = pptx.addSlide();
     slideCapa.addText("Relatório de Horas & Ergonomia", {
         x: 0.5, y: 1.5, w: '90%', h: 1,
@@ -317,14 +314,13 @@ async function gerarRelatorioPPTX() {
         fontSize: 14, color: "64748B", align: "center"
     });
 
-    // 3. Criar o Slide 2: Resumo das Empresas
+    // Slide 2: Resumo das Empresas
     let slideResumo = pptx.addSlide();
     slideResumo.addText("Resumo de Banco de Horas", {
         x: 0.5, y: 0.5, w: 9, h: 0.8,
         fontSize: 20, bold: true, color: "0F172A"
     });
 
-    // Dados para a tabela do PowerPoint
     let tabelaDados = [
         [
             { text: "Empresa", options: { bold: true, fill: "F1F5F9" } },
@@ -342,6 +338,5 @@ async function gerarRelatorioPPTX() {
         colW: [4.0, 2.5, 2.5]
     });
 
-    // 4. Guardar e descarregar o ficheiro .pptx
     await pptx.writeFile({ fileName: `Relatorio_ErgoControl_${new Date().toISOString().slice(0,10)}.pptx` });
 }
