@@ -202,7 +202,7 @@
             <section class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-5 rounded-xl shadow text-center space-y-3">
                 <h2 class="text-lg font-bold">📊 Baixar Relatório Mensal Formatado</h2>
                 <p class="text-xs text-blue-200">Gere um arquivo PowerPoint (.pptx) com os gráficos e tabelas consolidados.</p>
-                <button onclick="exportarPPTX()" class="bg-amber-400 text-slate-900 font-extrabold px-6 py-3 rounded-xl text-sm shadow-lg hover:bg-amber-300 transition-all">
+                <button onclick="gerarRelatorioPPTX()" class="bg-amber-400 text-slate-900 font-extrabold px-6 py-3 rounded-xl text-sm shadow-lg hover:bg-amber-300 transition-all">
                     📥 Baixar Relatório em PowerPoint
                 </button>
             </section>
@@ -269,6 +269,9 @@
         </div>
 
     </main>
+
+    <!-- Biblioteca para gerar PowerPoint diretamente no navegador -->
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"></script>
 
     <script src="app.js"></script>
 </body>

@@ -184,7 +184,7 @@ async function salvarAtividades() {
         { empresa: 'beconal', dados: dadosApp.beconal },
         { empresa: 'ens', dados: dadosApp.ens },
         { empresa: 'solar', dados: dadosApp.solar }
-    ]);
+    ], { onConflict: 'empresa' });
 
     alert('✅ Registros salvos no Supabase!');
 }
@@ -217,11 +217,11 @@ function carregarPainelAdmin() {
     document.getElementById('admin-beconal-container').innerHTML = `
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">AET Concluídas</label>
-            <input type="number" value="${dadosApp.beconal.aetTotal}" onchange="dadosApp.beconal.aetTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded w-full">
+            <input type="number" value="${dadosApp.beconal.aetTotal}" onchange="dadosApp.beconal.aetTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded w-full">
         </div>
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Coletas de Dados AET</label>
-            <input type="number" value="${dadosApp.beconal.coletaTotal}" onchange="dadosApp.beconal.coletaTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded w-full">
+            <input type="number" value="${dadosApp.beconal.coletaTotal}" onchange="dadosApp.beconal.coletaTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded w-full">
         </div>
     `;
 
@@ -230,8 +230,29 @@ function carregarPainelAdmin() {
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Grávidas (Tem / Avaliei)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.ens.gravidasTotal}" onchange="dadosApp.ens.gravidasTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.ens.gravidasAvaliadas}" onchange="dadosApp.ens.gravidasAvaliadas = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.gravidasTotal}" onchange="dadosApp.ens.gravidasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.gravidasAvaliadas}" onchange="dadosApp.ens.gravidasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+            </div>
+        </div>
+        <div class="p-2 border rounded bg-slate-50">
+            <label class="font-bold block mb-1">PRAT / Restrito (Tem / Avaliei)</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" value="${dadosApp.ens.pratTotal}" onchange="dadosApp.ens.pratTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.pratAvaliadas}" onchange="dadosApp.ens.pratAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+            </div>
+        </div>
+        <div class="p-2 border rounded bg-slate-50">
+            <label class="font-bold block mb-1">Retorno ao Trabalho (Tem / Avaliei)</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" value="${dadosApp.ens.retornoTotal}" onchange="dadosApp.ens.retornoTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.retornoAvaliadas}" onchange="dadosApp.ens.retornoAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+            </div>
+        </div>
+        <div class="p-2 border rounded bg-slate-50">
+            <label class="font-bold block mb-1">Investigação de Queixa (Tem / Avaliei)</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" value="${dadosApp.ens.queixasTotal}" onchange="dadosApp.ens.queixasTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.ens.queixasAvaliadas}" onchange="dadosApp.ens.queixasAvaliadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
     `;
@@ -241,11 +262,31 @@ function carregarPainelAdmin() {
         <div class="p-2 border rounded bg-slate-50">
             <label class="font-bold block mb-1">Revisão Lapide (Tem / Fiz)</label>
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" value="${dadosApp.solar.lapideTotal}" onchange="dadosApp.solar.lapideTotal = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
-                <input type="number" value="${dadosApp.solar.lapideFeitas}" onchange="dadosApp.solar.lapideFeitas = parseInt(this.value)||0; salvarAtividades();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.solar.lapideTotal}" onchange="dadosApp.solar.lapideTotal = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.solar.lapideFeitas}" onchange="dadosApp.solar.lapideFeitas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
             </div>
         </div>
+        <div class="p-2 border rounded bg-slate-50">
+            <label class="font-bold block mb-1">Inspeções e DDS (Inspeções / DDS)</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" value="${dadosApp.solar.inspecoesErgo}" onchange="dadosApp.solar.inspecoesErgo = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+                <input type="number" value="${dadosApp.solar.ddsFeitos}" onchange="dadosApp.solar.ddsFeitos = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded">
+            </div>
+        </div>
+        <div class="p-2 border rounded bg-slate-50 col-span-1 md:col-span-2">
+            <label class="font-bold block mb-1">CoErgo (Realizadas no ano)</label>
+            <input type="number" value="${dadosApp.solar.coergoRealizadas}" onchange="dadosApp.solar.coergoRealizadas = parseInt(this.value)||0; salvarAtividadesAdmin();" class="p-1 border rounded w-full">
+        </div>
     `;
+}
+
+// Função auxiliar silenciosa para salvar alterações feitas direto no Admin
+async function salvarAtividadesAdmin() {
+    await _supabase.from('atividades').upsert([
+        { empresa: 'beconal', dados: dadosApp.beconal },
+        { empresa: 'ens', dados: dadosApp.ens },
+        { empresa: 'solar', dados: dadosApp.solar }
+    ], { onConflict: 'empresa' });
 }
 
 async function excluirPonto(id) {
@@ -257,34 +298,50 @@ async function excluirPonto(id) {
     }
 }
 
-// Chamada para a Serverless Function na Vercel para baixar o PPTX
-async function exportarPPTX() {
-    const dataAtual = new Date();
-    dadosApp.mesAno = `${dataAtual.getMonth() + 1}/${dataAtual.getFullYear()}`;
+// Geração do Relatório PowerPoint diretamente pelo navegador (PptxGenJS)
+async function gerarRelatorioPPTX() {
+    // 1. Instanciar o PptxGenJS
+    let pptx = new PptxGenJS();
 
-    const payload = {
-        mesAno: dadosApp.mesAno,
-        beconal: dadosApp.beconal,
-        ens: dadosApp.ens,
-        solar: dadosApp.solar
-    };
+    // Configurações do slide (16:9)
+    pptx.layout = 'LAYOUT_16x9';
 
-    const res = await fetch('/api/gerar-pptx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    // 2. Criar o Slide 1: Capa
+    let slideCapa = pptx.addSlide();
+    slideCapa.addText("Relatório de Horas & Ergonomia", {
+        x: 0.5, y: 1.5, w: '90%', h: 1,
+        fontSize: 28, bold: true, color: "1E293B", align: "center"
+    });
+    slideCapa.addText(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, {
+        x: 0.5, y: 2.5, w: '90%', h: 0.5,
+        fontSize: 14, color: "64748B", align: "center"
     });
 
-    if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Relatorio_Empresas_${Date.now()}.pptx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } else {
-        alert('Erro ao gerar apresentação!');
-    }
+    // 3. Criar o Slide 2: Resumo das Empresas
+    let slideResumo = pptx.addSlide();
+    slideResumo.addText("Resumo de Banco de Horas", {
+        x: 0.5, y: 0.5, w: 9, h: 0.8,
+        fontSize: 20, bold: true, color: "0F172A"
+    });
+
+    // Dados para a tabela do PowerPoint
+    let tabelaDados = [
+        [
+            { text: "Empresa", options: { bold: true, fill: "F1F5F9" } },
+            { text: "Registradas", options: { bold: true, fill: "F1F5F9" } },
+            { text: "Meta Mensal", options: { bold: true, fill: "F1F5F9" } }
+        ],
+        ["Beconal (3h/dia)", `${document.getElementById('hrs-beconal').innerText}h`, "60h"],
+        ["Grupo ENS (3x/sem)", `${document.getElementById('hrs-ens').innerText}h`, "36h"],
+        ["Solar Coca-Cola (1x/sem)", `${document.getElementById('hrs-solar').innerText}h`, "24h"]
+    ];
+
+    slideResumo.addTable(tabelaDados, {
+        x: 0.5, y: 1.5, w: 9,
+        border: { pt: 1, color: "CBD5E1" },
+        colW: [4.0, 2.5, 2.5]
+    });
+
+    // 4. Guardar e descarregar o ficheiro .pptx
+    await pptx.writeFile({ fileName: `Relatorio_ErgoControl_${new Date().toISOString().slice(0,10)}.pptx` });
 }
