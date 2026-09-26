@@ -1,6 +1,6 @@
 // CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas credenciais do painel do Supabase)
 const SUPABASE_URL = "https://xwmbdqhombbtfwpnxzzy.supabase.co";
-const SUPABASE_KEY = "sb_publishable_L7S2l8_r9BjV0iIAWB6pQw_XvBf5ZEL";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3bWJkcWhvbWJidGZ3cG54enp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzODA5NzAsImV4cCI6MjEwNTk1Njk3MH0.y2QOGi75QQe2bzKIwxVUcht9_9LhmW3DQgntu-vRDS0";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let dadosApp = {
