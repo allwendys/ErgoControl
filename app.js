@@ -131,12 +131,12 @@ function atualizarTelaPonto() {
     const totais = { beconal: 0, ems: 0, solar: 0 };
     dadosApp.pontoHistorico.forEach(p => totais[p.empresa] += Number(p.horas));
 
-    // Atualiza as horas registradas na tela
-    document.getElementById('hrs-ems').innerText = Number(totais.beconal.toFixed(2));
+    // Atualiza as horas registadas no ecrã (correção do ID aqui)
+    document.getElementById('hrs-beconal').innerText = Number(totais.beconal.toFixed(2));
     document.getElementById('hrs-ems').innerText = Number(totais.ems.toFixed(2));
     document.getElementById('hrs-solar').innerText = Number(totais.solar.toFixed(2));
 
-    // Saldo de folgas (Horas que excedem a meta do mês)
+    // Saldo de folgas
     document.getElementById('folga-beconal').innerText = `${Math.max(0, Number((totais.beconal - 60).toFixed(2)))}h`;
     document.getElementById('folga-ems').innerText = `${Math.max(0, Number((totais.ems - 36).toFixed(2)))}h`;
     document.getElementById('folga-solar').innerText = `${Math.max(0, Number((totais.solar - 24).toFixed(2)))}h`;
